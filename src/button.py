@@ -1,4 +1,4 @@
-import pygame, assets, json, assets
+import pygame, assets, json, assets, sys
 WHITE = (255, 255, 255)
 GREY = (200, 200, 200)
 LIGHT_GREY = (230, 230, 230)
@@ -62,8 +62,9 @@ class Button:
 
     @staticmethod
     def save_game():
+        print('in save', assets.player.rect.topleft)
         game_state = {
-            'player_position': list(assets.player.rect.center)
+            'player_position': list(assets.player.rect.topleft)
         }
         with open('../saved/game_state.json', 'w') as f:
             json.dump(game_state, f, indent = 4)

@@ -16,4 +16,7 @@ def importAssets():
     global width, height, screen
     width, height = pygame.display.list_modes()[0]
     screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+
+LEVELS = {'level1': {'Background': 0, 'Level': 2, 'Frost': 3, 'Lava': 4}
+          }
     
