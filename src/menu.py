@@ -1,12 +1,8 @@
-import pygame
+import pygame, assets
 import sys
 from game import Game
 
 # screen details
-info = None
-width = None
-height = None
-screen = None
 
 # background details
 background = None
@@ -48,10 +44,10 @@ class Button:
     def draw(self):
         # Decide which image to use based on hover state
         frame_image_to_use = self.greyed_frame_image if self.hovered else self.frame_image
-        screen.blit(frame_image_to_use, self.frame_rect.topleft)
+        assets.screen.blit(frame_image_to_use, self.frame_rect.topleft)
 
         # Draw the text
-        screen.blit(self.rendered_text, self.text_rect)
+        assets.screen.blit(self.rendered_text, self.text_rect)
 
     def is_hovered(self, position):
         if self.frame_rect.collidepoint(position):
@@ -69,32 +65,27 @@ class Button:
         if self.action:
             self.action()
 class Menu:
-    def __init__(self, _info, _width, _height, _screen):
-        global info, width, height, screen, background, titleText
-        info = _info
-        width = _width
-        height = _height
-        screen = _screen
+    def __init__(self):
+        global background, titleText
 
         self.buttons = [
-            Button("Play Game", 5 * width / 6, 3 * height / 4 - 60, self.play_game),
-            Button("Settings", 5 * width / 6, 3 * height / 4),
-            Button("Quit", 5 * width / 6, 3 * height / 4 + 60, self.quit_game)
+            Button("Play Game", 5 * assets.width / 6, 3 * assets.height / 4 - 60, self.play_game),
+            Button("Settings", 5 * assets.width / 6, 3 * assets.height / 4),
+            Button("Quit", 5 * assets.width / 6, 3 * assets.height / 4 + 60, self.quit_game)
         ]
 
         background = pygame.image.load('../graphics/menu/menu_bg.png').convert_alpha()
-        background = pygame.transform.scale(background, (width, height))
+        background = pygame.transform.scale(background, (assets.width, assets.height))
         titleText = pygame.image.load('../graphics/menu/game_title.png').convert_alpha()
-        titleText = pygame.transform.scale(titleText, (width / 2, height / 2))
+        titleText = pygame.transform.scale(titleText, (assets.width / 2, assets.height / 2))
 
     def draw(self):
-        pass
         # Draw background
-        screen.blit(background, (0, 0))
+        assets.screen.blit(background, (0, 0))
 
         # # Draw title
-        titleRect = titleText.get_rect(center=(width / 2, height / 4))
-        screen.blit(titleText, titleRect)
+        titleRect = titleText.get_rect(center=(assets.width / 2, assets.height / 4))
+        assets.screen.blit(titleText, titleRect)
 
         # # Draw buttons
         for button in self.buttons:
@@ -107,7 +98,7 @@ class Menu:
 
     @staticmethod
     def play_game():
-        game = Game(width, height, screen)
+        game = Game()
         game.run()
 
 

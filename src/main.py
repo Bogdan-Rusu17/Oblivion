@@ -1,21 +1,15 @@
-import pygame
+import pygame, assets
 from menu import Menu
-
-info = None
-width = None
-height = None
-screen = None
 
 class Main():
     def __init__(self):
         pygame.init()
-        global info, width, height, screen
-        info = pygame.display.Info()
-        width, height = info.current_w, info.current_h
-        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        assets.importAssets()
+        pygame.display.set_caption('Oblivion')
+        pygame.display.set_icon(pygame.image.load('../graphics/game_icon.png').convert_alpha())
 
     def run(self):
-        menu = Menu(info, width, height, screen)
+        menu = Menu()
         menu.run()
 
 if __name__ == '__main__':

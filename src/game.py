@@ -1,10 +1,7 @@
-import pygame, sys
+import pygame, sys, assets
 from pytmx.util_pygame import load_pygame
 from player import Player
 
-width = None
-height = None
-screen = None
 
 class AllSprites(pygame.sprite.Group):
     def __init__(self):
@@ -14,8 +11,8 @@ class AllSprites(pygame.sprite.Group):
         self.bg = pygame.image.load('../data/game_data/map_level1.png').convert_alpha()
 
     def customizeDraw(self, player):
-        self.offset.x = player.rect.centerx - width / 2
-        self.offset.y = player.rect.centery - height / 2
+        self.offset.x = player.rect.centerx - assets.width / 2
+        self.offset.y = player.rect.centery - assets.height / 2
         # blit surfaces
         self.displaySurface.blit(self.bg, -self.offset)
         for sprite in sorted(self.sprites(), key = lambda sprite: sprite.rect.centery):
@@ -31,12 +28,8 @@ class MySprite(pygame.sprite.Sprite):
         self.hitbox = self.rect.inflate(0, -self.rect.height / 3)
 
 class Game():
-    def __init__(self, _width, _height, _screen):
-        global width, height, screen
-        width = _width
-        height = _height
-        screen = _screen
-        self.displaySurface = screen
+    def __init__(self):
+        self.displaySurface = assets.screen
         self.allSprites = AllSprites()
         self.clock = pygame.time.Clock()
         self.setup()
