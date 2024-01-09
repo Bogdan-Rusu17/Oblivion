@@ -1,4 +1,4 @@
-import pygame, assets
+import pygame, assets, sys
 from os import walk
 
 class Player(pygame.sprite.Sprite):
@@ -46,6 +46,9 @@ class Player(pygame.sprite.Sprite):
         self.meleeDamage = 30 * assets.POWER[assets.level]
         self.manaBar = ManaBar(groups, self)
         self.healthBar = HealthBar(groups, self, self.manaBar)
+
+        # win dance
+        self.canDance = False
 
     def detectFireboltCollision(self):
         for sprite in self.collisionSpells.sprites():
@@ -203,6 +206,15 @@ class Player(pygame.sprite.Sprite):
         self.health -= amount
 
     def update(self, dt):
+
+        if self.canDance:
+            self.status = 'Kicking'
+            self.rect.centerx = assets.width / 2
+            self.rect.centery = assets.height / 2
+            self.animate(dt)
+            return
+
+
         self.oldRect = self.rect.copy()
         self.input()
         self.getStatus()
@@ -221,6 +233,9 @@ class Player(pygame.sprite.Sprite):
         self.manaBar.rect.midbottom = self.rect.midtop
         self.healthBar.rect.midbottom = self.manaBar.rect.midtop
         self.checkWinLevel()
+        if self.health <= 0:
+            pygame.quit()
+            sys.exit()
 
 
 class Deathbolt(pygame.sprite.Sprite):

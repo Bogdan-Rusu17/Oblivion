@@ -32,6 +32,8 @@ class MySprite(pygame.sprite.Sprite):
 
 class Game():
     def __init__(self, flag):
+        self.isWon = False
+        self.winTime = None
         self.displaySurface = assets.screen
         self.clock = pygame.time.Clock()
         
@@ -184,14 +186,29 @@ class Game():
             self.allSprites.update(dt)
             # draw groups
             self.displaySurface.fill('black')
-            self.allSprites.customDraw(self.player)
-            self.optionsMenu.draw()
+            if self.isWon == False:
+                self.allSprites.customDraw(self.player)
+                self.optionsMenu.draw()
+            else:
+                self.player.canDance = True
+                self.allSprites = AllSprites()
+                font = pygame.font.Font(None, 50)
+                self.allSprites.add(self.player)
+                self.allSprites.customDraw(self.player)
+                if self.winTime == None:
+                    self.winTime = pygame.time.get_ticks() / 1000
+                text_surf = font.render(f'You won in {self.winTime} seconds!', True, 'white')
+                text_rect = text_surf.get_rect(center = (assets.width / 2, assets.height / 5))
+                self.displaySurface.blit(text_surf, text_rect)
             
             # treci la niv urmator
             if self.player.rect.colliderect(self.portal):
                 word, number = assets.level[:-1], assets.level[-1]
                 next_number = str(int(number) + 1)
-                assets.level = word + next_number
-                self.setup_new()
+                if int(number) + 1 == 3:
+                    self.isWon = True
+                else:
+                    assets.level = word + next_number
+                    self.setup_new()
 
             pygame.display.update()
