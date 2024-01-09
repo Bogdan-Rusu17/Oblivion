@@ -5,6 +5,8 @@ width = None
 height = None
 screen = None
 player = None
+enemies = None
+level = 'level1'
 
 def importAssets():
     try:
@@ -17,6 +19,10 @@ def importAssets():
     width, height = pygame.display.list_modes()[0]
     screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
 
-LEVELS = {'level1': {'Background': 0, 'Level': 2, 'Frost': 3, 'Lava': 4}
+LEVELS = {'level1': {'Basics': 0, 'Border': 2, 'Platforms': 3, 'Lava': 4},
+          'level2': {'Lava': 4}
           }
+LAYERS = {'level1': ['Basics', 'Border', 'Platforms'], 'level2': ['Border', 'Ice']}
+
+POWER = {'level1': 1, 'level2': 2}
     

@@ -1,0 +1,13 @@
+{
+    "level": "level1",
+    "player": {
+        "position": [100, 100],
+        "health": 100,
+        "mana": 20
+    },
+    "imps":[
+        {"position":[200, 200], "health": 20},
+        {"position":[300, 300], "health": 30}
+    ]
+    
+}

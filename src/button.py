@@ -62,9 +62,19 @@ class Button:
 
     @staticmethod
     def save_game():
-        print('in save', assets.player.rect.topleft)
+        
+        imp_dict = []
+        for enemy in assets.enemies:
+            if enemy.name == 'imp':
+                imp_dict.append({'position': list(enemy.rect.topleft), 'health': enemy.health})
         game_state = {
-            'player_position': list(assets.player.rect.topleft)
+            'level': assets.level,
+            'player': {
+                'player_position': list(assets.player.rect.topleft),
+                'health': assets.player.health,
+                'mana': assets.player.mana
+            },
+            'imps': imp_dict
         }
         with open('../saved/game_state.json', 'w') as f:
             json.dump(game_state, f, indent = 4)

@@ -2,7 +2,7 @@ import pygame, assets
 from os import walk
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, path, collisionSprites, collisionSpells, enemies):
+    def __init__(self, pos, groups, path, collisionSprites, collisionSpells, enemies, hp = 250, mp = 100, invisibleWalls = []):
         super().__init__(groups)
 
         self.allSprites = groups
@@ -18,7 +18,7 @@ class Player(pygame.sprite.Sprite):
         
         self.rect = self.rect.inflate(-self.rect.width / 2, -self.rect.height / 3)
         self.rect.topleft = pos
-        self.z = assets.LEVELS['level1']['Level']
+        self.z = 4
 
         # float based movement
         self.pos = pygame.math.Vector2(self.rect.topleft)
@@ -26,23 +26,24 @@ class Player(pygame.sprite.Sprite):
         self.speed = 400
 
         # collisions
+        self.invisibleWalls = invisibleWalls
         self.oldRect = self.rect.copy()
         self.collisionSprites = collisionSprites
 
         # vertical movement
         self.gravity = 15
-        self.jump_speed = 1200
+        self.jump_speed = 1700
         self.onFloor = False
         self.movingFloor = None
 
         # health mechanics
-        self.health = 250
-        self.mana = 100
+        self.health = hp
+        self.mana = mp
         self.attackingMelee = False
         self.attackingSpell = False
         self.attackTime = 0
         self.enemies = enemies
-        self.meleeDamage = 10
+        self.meleeDamage = 30 * assets.POWER[assets.level]
         self.manaBar = ManaBar(groups, self)
         self.healthBar = HealthBar(groups, self, self.manaBar)
 
@@ -51,7 +52,9 @@ class Player(pygame.sprite.Sprite):
             if self.rect.colliderect(sprite):
                 self.damage(sprite.amount)
                 sprite.kill()
-                print(self.health)
+
+    def checkWinLevel(self):
+        pass
 
     def getStatus(self):
         if self.direction.x == 0 and self.onFloor:
@@ -161,6 +164,14 @@ class Player(pygame.sprite.Sprite):
                         self.rect.top = sprite.rect.bottom
                     self.pos.y = self.rect.y
                     self.direction.y = 0
+        for wall in self.invisibleWalls:
+            if wall.rect.colliderect(self.rect):
+                if direction == 'horizontal':
+                    if self.rect.left <= wall.rect.right and wall.which == 'left':
+                        self.rect.left = wall.rect.right
+                    if self.rect.right >= wall.rect.left and wall.which == 'right':
+                        self.rect.right = wall.rect.left
+                    self.pos.x = self.rect.x
         if self.onFloor and self.direction.y != 0:
             self.onFloor = False
 
@@ -209,14 +220,15 @@ class Player(pygame.sprite.Sprite):
         self.manaBar.mana = self.mana
         self.manaBar.rect.midbottom = self.rect.midtop
         self.healthBar.rect.midbottom = self.manaBar.rect.midtop
+        self.checkWinLevel()
 
 
 class Deathbolt(pygame.sprite.Sprite):
     def __init__(self, surf, pos, direction, groups, enemies):
         super().__init__(groups)
         self.enemies = enemies
-        self.amount = 15
-        self.z = assets.LEVELS['level1']['Level']
+        self.amount = 70 * assets.POWER[assets.level]
+        self.z = assets.LEVELS['level1']['Border']
 
         self.image = surf
         self.rect = self.image.get_rect(topleft = pos)
@@ -224,7 +236,7 @@ class Deathbolt(pygame.sprite.Sprite):
         # float based movement
         self.pos = pygame.math.Vector2(self.rect.topleft)
         self.direction = direction
-        self.speed = 400
+        self.speed = 600
 
     def detectEnemyCollision(self):
         for sprite in self.enemies.sprites():
@@ -244,17 +256,16 @@ class Deathbolt(pygame.sprite.Sprite):
 class HealthBar(pygame.sprite.Sprite):
     def __init__(self, groups, player, manabar):
         super().__init__(groups)
-        self.z = assets.LEVELS['level1']['Level']
+        self.z = 10
         self.image = pygame.Surface((2 * player.rect.width, player.rect.height / 4))
         self.rect = self.image.get_rect(midbottom = manabar.rect.midtop)
         self.image.fill('red', (0, 0, self.rect.width, self.rect.height))
 
         self.health = player.health
-        self.maxHealth = self.health
+        self.maxHealth = 250
     
     def computeCurrentHealthPercent(self):
         percent = self.health / self.maxHealth
-        # print(percent)
         percentRect = pygame.Rect(0, 0, round(self.rect.width * percent), self.rect.height)
         self.image.fill('red', percentRect)
         percentRect = pygame.Rect(round(self.rect.width * percent), 0, self.rect.width - round(self.rect.width * percent), self.rect.height)
@@ -268,17 +279,16 @@ class HealthBar(pygame.sprite.Sprite):
 class ManaBar(pygame.sprite.Sprite):
     def __init__(self, groups, player):
         super().__init__(groups)
-        self.z = assets.LEVELS['level1']['Level']
+        self.z = 10
         self.image = pygame.Surface((2 * player.rect.width, player.rect.height / 4))
         self.rect = self.image.get_rect(midbottom = player.rect.midtop)
         self.image.fill('blue', (0, 0, self.rect.width, self.rect.height))
-
+        
         self.mana = player.mana
-        self.maxMana = self.mana
+        self.maxMana = 100
     
     def computeCurrentManaPercent(self):
         percent = self.mana / self.maxMana
-        # print(percent)
         percentRect = pygame.Rect(0, 0, round(self.rect.width * percent), self.rect.height)
         self.image.fill('blue', percentRect)
         percentRect = pygame.Rect(round(self.rect.width * percent), 0, self.rect.width - round(self.rect.width * percent), self.rect.height)

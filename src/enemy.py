@@ -11,12 +11,12 @@ class Enemy(pygame.sprite.Sprite):
         self.status = 'left_stand'
         self.image = self.animations[self.status][self.frameIndex]
         self.rect = self.image.get_rect(topleft = pos)
-        self.z = assets.LEVELS['level1']['Level']
+        self.z = assets.LEVELS['level1']['Border']
 
         self.detectRange = 600
         self.attackRange = 400
-        self.attackPower = 20
-        self.health = 100
+        self.attackPower = 40 * assets.POWER[assets.level]
+        self.health = 300 * assets.POWER[assets.level]
 
     def animate(self, dt):
         self.frameIndex += 20 * dt
@@ -63,22 +63,26 @@ class Enemy(pygame.sprite.Sprite):
     def checkDeath(self):
         if self.health <= 0:
             self.kill()
+            self.healthBar.kill()
 
     def damage(self, amount):
         self.health -= amount
 
 class Imp(Enemy):
-    def __init__(self, pos, groups, path, player):
+    def __init__(self, pos, groups, path, player, hp = 300 * assets.POWER[assets.level]):
         super().__init__(pos, [groups[0], groups[1]], path, player)
 
         self.allSprites = groups[0]
         self.fireboltSprites = groups[2]
 
         self.attacking = False
-        self.attackPower = 5
-        self.health = 15
+        self.attackPower = 15 * assets.POWER[assets.level]
+        self.health = hp
+        self.maxHealth = 300 * assets.POWER[assets.level]
+        self.healthBar = HealthBar(groups[0], self)
 
         self.lastAttack = 0
+        self.name = 'imp'
 
     def attackSpell(self):
         distToPlayer = self.getPlayerDistanceDirection()[0]
@@ -111,12 +115,14 @@ class Imp(Enemy):
 
         self.animate(dt)
         self.checkDeath()
+        self.healthBar.health = self.health
+        self.healthBar.rect.midbottom = self.rect.midtop
 
 class Firebolt(pygame.sprite.Sprite):
     def __init__(self, surf,  pos, direction, groups):
         super().__init__(groups)
         self.amount = 3
-        self.z = assets.LEVELS['level1']['Level']
+        self.z = assets.LEVELS['level1']['Border']
 
         self.image = surf
         self.rect = self.image.get_rect(topleft = pos)
@@ -134,6 +140,24 @@ class Firebolt(pygame.sprite.Sprite):
     def update(self, dt):
         self.move(dt)
 
+class HealthBar(pygame.sprite.Sprite):
+    def __init__(self, groups, enemy):
+        super().__init__(groups)
+        self.z = 10
+        self.image = pygame.Surface((2 * enemy.rect.width, enemy.rect.height / 4))
+        self.rect = self.image.get_rect(midbottom = enemy.rect.midtop)
+        self.image.fill('red', (0, 0, self.rect.width, self.rect.height))
+
+        self.health = enemy.health
+        self.maxHealth = enemy.maxHealth
+    
+    def computeCurrentHealthPercent(self):
+        percent = self.health / self.maxHealth
+        percentRect = pygame.Rect(0, 0, round(self.rect.width * percent), self.rect.height)
+        self.image.fill('red', percentRect)
+        percentRect = pygame.Rect(round(self.rect.width * percent), 0, self.rect.width - round(self.rect.width * percent), self.rect.height)
+        self.image.fill('black', percentRect)
 
 
-
+    def update(self, dt):
+        self.computeCurrentHealthPercent()

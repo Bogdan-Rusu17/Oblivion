@@ -2,7 +2,7 @@ import pygame, sys, assets, json
 from pytmx.util_pygame import load_pygame
 from player import Player
 from options_menu import OptionsMenu
-from tile import Tile, CollisionTile, MovingObject
+from tile import Tile, CollisionTile, MovingObject, InvisibleWall, Portal
 from enemy import Imp
 
 
@@ -44,6 +44,7 @@ class Game():
         self.platformSprites = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.firebolts = pygame.sprite.Group()
+        self.portal = pygame.sprite.Sprite()
 
         # load previous game or start new game
         if flag == 'new':
@@ -69,16 +70,26 @@ class Game():
                 platform.direction.y = -1
 
     def setup_new(self):
-        tmx_map = load_pygame('../data/game_data/level1/map.tmx')
-        # tiles
-        for x, y, surface in tmx_map.get_layer_by_name('Level').tiles():
-            CollisionTile((x * 64, y * 64), surface, [self.allSprites, self.collisionSprites])
+        self.allSprites = AllSprites()
+        self.collisionSprites = pygame.sprite.Group()
+        self.platformSprites = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
+        self.firebolts = pygame.sprite.Group()
+        self.portal = pygame.sprite.Sprite()
 
-        for layer in ['Background', 'Frost', 'Lava']:
+        tmx_map = load_pygame('../data/game_data/level1/' + assets.level + '.tmx')
+        # tiles
+        for layer in assets.LAYERS[assets.level]:
+            for x, y, surface in tmx_map.get_layer_by_name(layer).tiles():
+                CollisionTile((x * 64, y * 64), surface, [self.allSprites, self.collisionSprites])
+        
+        self.invisibleWalls = []
+        for obj in tmx_map.get_layer_by_name('InvisibleWalls'):
+            self.invisibleWalls.append(InvisibleWall(obj.x, obj.y, obj.width, obj.height, obj.name))
+
+        for layer in ['Lava']:
             for x, y, surface in tmx_map.get_layer_by_name(layer).tiles():
                 Tile((x * 64, y * 64), surface, self.allSprites, assets.LEVELS['level1'][layer])
-        # for obj in tmx_map.get_layer_by_name('Objects'):
-        #     MySprite((obj.x, obj.y), obj.image, allSprites)
 
         for obj in tmx_map.get_layer_by_name('Entities'):
             if obj.name == 'Player':
@@ -87,45 +98,65 @@ class Game():
                                      path = '../graphics/player',
                                      collisionSprites = self.collisionSprites,
                                      collisionSpells = self.firebolts,
-                                     enemies = self.enemies)   
+                                     enemies = self.enemies,
+                                     invisibleWalls = self.invisibleWalls)   
             if obj.name == 'Imp':
                 Imp(pos = (obj.x, obj.y),
                     groups = [self.allSprites, self.enemies, self.firebolts],
                     path = '../graphics/enemies/imp',
                     player = self.player)
+            if obj.name == 'Portal':
+                self.portal = Portal((obj.x, obj.y), obj.image, self.allSprites)
                 
         assets.player = self.player
-        self.platformRects = []
-        for obj in tmx_map.get_layer_by_name('Platforms'):
-            if obj.name == 'Platform':
-                MovingObject((obj.x, obj.y), obj.image, [self.allSprites, self.collisionSprites, self.platformSprites])
-            else:
-                borderRect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
-                self.platformRects.append(borderRect)
+        assets.enemies = self.enemies
 
     def setup_load(self):
-        tmx_map = load_pygame('../data/game_data/level1/map.tmx')
+        self.allSprites = AllSprites()
+        self.collisionSprites = pygame.sprite.Group()
+        self.platformSprites = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
+        self.firebolts = pygame.sprite.Group()
+        self.portal = pygame.sprite.Sprite()
+        assets.level = self.load_game_state()['level']
+        tmx_map = load_pygame('../data/game_data/level1/' + self.load_game_state()['level'] + '.tmx')
+        
         # tiles
-        for x, y, surface in tmx_map.get_layer_by_name('Level').tiles():
-            CollisionTile((x * 64, y * 64), surface, [self.allSprites, self.collisionSprites])
-
-        for layer in ['Background', 'Frost', 'Lava']:
+        for layer in assets.LAYERS[assets.level]:
             for x, y, surface in tmx_map.get_layer_by_name(layer).tiles():
-                Tile((x * 64, y * 64), surface, self.allSprites, assets.LEVELS['level1'][layer])
-        self.player = Player(pos = self.load_game_state().get('player_position', (0, 0)),
+                CollisionTile((x * 64, y * 64), surface, [self.allSprites, self.collisionSprites])
+
+        self.invisibleWalls = []
+        for obj in tmx_map.get_layer_by_name('InvisibleWalls'):
+            self.invisibleWalls.append(InvisibleWall(obj.x, obj.y, obj.width, obj.height, obj.name))
+
+        loadState = self.load_game_state()
+
+        for layer in ['Lava']:
+            for x, y, surface in tmx_map.get_layer_by_name(layer).tiles():
+                Tile((x * 64, y * 64), surface, self.allSprites, assets.LEVELS[loadState['level']][layer])
+        self.player = Player(pos = loadState['player']['player_position'],
                              groups = self.allSprites,
                              path = '../graphics/player',
                              collisionSprites = self.collisionSprites,
-                             collisionSpells = self.firebolts)
+                             collisionSpells = self.firebolts,
+                             enemies = self.enemies,
+                             hp = loadState['player']['health'],
+                             mp = loadState['player']['mana'],
+                             invisibleWalls = self.invisibleWalls)
         assets.player = self.player
+        assets.enemies = self.enemies
 
-        self.platformRects = []
-        for obj in tmx_map.get_layer_by_name('Platforms'):
-            if obj.name == 'Platform':
-                MovingObject((obj.x, obj.y), obj.image, [self.allSprites, self.collisionSprites, self.platformSprites])
-            else:
-                borderRect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
-                self.platformRects.append(borderRect)
+        for imp in loadState['imps']:
+            Imp(pos = (imp['position']),
+                    groups = [self.allSprites, self.enemies, self.firebolts],
+                    path = '../graphics/enemies/imp',
+                    player = self.player,
+                    hp = imp['health'])
+        for obj in tmx_map.get_layer_by_name('Entities'):
+            if obj.name == 'Portal':
+                self.portal = Portal((obj.x, obj.y), obj.image, self.allSprites)    
+        
     
     def load_game_state(self):
         with open('../saved/game_state.json', 'r') as f:
@@ -133,7 +164,6 @@ class Game():
         return game_state
 
     def run(self):
-        
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -155,5 +185,12 @@ class Game():
             self.displaySurface.fill('black')
             self.allSprites.customDraw(self.player)
             self.optionsMenu.draw()
+            
+            # treci la niv urmator
+            if self.player.rect.colliderect(self.portal):
+                word, number = assets.level[:-1], assets.level[-1]
+                next_number = str(int(number) + 1)
+                assets.level = word + next_number
+                self.setup_new()
 
             pygame.display.update()
