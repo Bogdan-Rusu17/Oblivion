@@ -3,7 +3,7 @@ from pytmx.util_pygame import load_pygame
 from player import Player
 from options_menu import OptionsMenu
 from tile import Tile, CollisionTile, MovingObject
-
+from enemy import Imp
 
 
 class AllSprites(pygame.sprite.Group):
@@ -42,6 +42,8 @@ class Game():
         self.allSprites = AllSprites()
         self.collisionSprites = pygame.sprite.Group()
         self.platformSprites = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
+        self.firebolts = pygame.sprite.Group()
 
         # load previous game or start new game
         if flag == 'new':
@@ -80,12 +82,19 @@ class Game():
 
         for obj in tmx_map.get_layer_by_name('Entities'):
             if obj.name == 'Player':
-                print(obj.x, obj.y)
                 self.player = Player(pos = (obj.x, obj.y),
                                      groups = self.allSprites,
                                      path = '../graphics/player',
-                                     collisionSprites = self.collisionSprites)
-                assets.player = self.player
+                                     collisionSprites = self.collisionSprites,
+                                     collisionSpells = self.firebolts,
+                                     enemies = self.enemies)   
+            if obj.name == 'Imp':
+                Imp(pos = (obj.x, obj.y),
+                    groups = [self.allSprites, self.enemies, self.firebolts],
+                    path = '../graphics/enemies/imp',
+                    player = self.player)
+                
+        assets.player = self.player
         self.platformRects = []
         for obj in tmx_map.get_layer_by_name('Platforms'):
             if obj.name == 'Platform':
@@ -106,7 +115,8 @@ class Game():
         self.player = Player(pos = self.load_game_state().get('player_position', (0, 0)),
                              groups = self.allSprites,
                              path = '../graphics/player',
-                             collisionSprites = self.collisionSprites)
+                             collisionSprites = self.collisionSprites,
+                             collisionSpells = self.firebolts)
         assets.player = self.player
 
         self.platformRects = []
