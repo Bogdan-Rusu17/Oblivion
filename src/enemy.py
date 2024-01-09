@@ -69,11 +69,14 @@ class Enemy(pygame.sprite.Sprite):
         self.health -= amount
 
 class Imp(Enemy):
-    def __init__(self, pos, groups, path, player, hp = 300 * assets.POWER[assets.level]):
+    def __init__(self, pos, groups, path, player, hp):
         super().__init__(pos, [groups[0], groups[1]], path, player)
 
         self.allSprites = groups[0]
         self.fireboltSprites = groups[2]
+
+        if hp == None:
+            hp = 300 * assets.POWER[assets.level]
 
         self.attacking = False
         self.attackPower = 15 * assets.POWER[assets.level]
@@ -149,9 +152,10 @@ class HealthBar(pygame.sprite.Sprite):
         self.image.fill('red', (0, 0, self.rect.width, self.rect.height))
 
         self.health = enemy.health
-        self.maxHealth = enemy.maxHealth
+        self.maxHealth = 300 * assets.POWER[assets.level]
     
     def computeCurrentHealthPercent(self):
+        
         percent = self.health / self.maxHealth
         percentRect = pygame.Rect(0, 0, round(self.rect.width * percent), self.rect.height)
         self.image.fill('red', percentRect)

@@ -104,7 +104,8 @@ class Game():
                 Imp(pos = (obj.x, obj.y),
                     groups = [self.allSprites, self.enemies, self.firebolts],
                     path = '../graphics/enemies/imp',
-                    player = self.player)
+                    player = self.player, 
+                    hp = None)
             if obj.name == 'Portal':
                 self.portal = Portal((obj.x, obj.y), obj.image, self.allSprites)
                 
