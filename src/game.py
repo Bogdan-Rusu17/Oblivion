@@ -202,7 +202,7 @@ class Game():
                 self.displaySurface.blit(text_surf, text_rect)
             
             # treci la niv urmator
-            if self.player.rect.colliderect(self.portal):
+            if len(self.enemies) == 0 and self.player.rect.colliderect(self.portal):
                 word, number = assets.level[:-1], assets.level[-1]
                 next_number = str(int(number) + 1)
                 if int(number) + 1 == 3:
