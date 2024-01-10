@@ -32,7 +32,7 @@ class Player(pygame.sprite.Sprite):
 
         # vertical movement
         self.gravity = 15
-        self.jump_speed = 1000 * assets.height / 1080
+        self.jump_speed = 1200 * assets.height / 1080
         self.onFloor = False
         self.movingFloor = None
 
