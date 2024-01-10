@@ -59,7 +59,7 @@ class Button:
     @staticmethod
     def quit_game():
         pygame.quit()
-        exit()
+        sys.exit()
 
     @staticmethod
     def save_game():
