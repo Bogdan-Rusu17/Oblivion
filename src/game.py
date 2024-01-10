@@ -167,6 +167,8 @@ class Game():
         return game_state
 
     def run(self):
+        assets.menuMusic.stop()
+        assets.gameMusic.play(loops = -1)
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -195,6 +197,9 @@ class Game():
                 font = pygame.font.Font(None, 50)
                 self.allSprites.add(self.player)
                 self.allSprites.customDraw(self.player)
+                self.optionsMenu.draw()
+                assets.gameMusic.stop()
+                assets.victoryMusic.play(loops = -1)
                 if self.winTime == None:
                     self.winTime = pygame.time.get_ticks() / 1000
                 text_surf = font.render(f'You won in {self.winTime} seconds!', True, 'white')
@@ -203,6 +208,7 @@ class Game():
             
             # treci la niv urmator
             if len(self.enemies) == 0 and self.player.rect.colliderect(self.portal):
+                assets.portalSound.play()
                 word, number = assets.level[:-1], assets.level[-1]
                 next_number = str(int(number) + 1)
                 if int(number) + 1 == 3:

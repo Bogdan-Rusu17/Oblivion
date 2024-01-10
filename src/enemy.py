@@ -35,7 +35,7 @@ class Enemy(pygame.sprite.Sprite):
                     path = folder[0].replace('\\', '/') + '/' + file_name
                     surf = pygame.image.load(path).convert_alpha()
                     surf = pygame.transform.scale(surf, (assets.width / 8, surf.get_height() * assets.width / (8 * surf.get_width())))
-                    key = folder[0].split('\\')[1]
+                    key = folder[0].replace('\\', '/').split('/')[-1]
                     self.animations[key].append(surf)
         self.fireboltSurf = pygame.image.load('../graphics/particles/flame/fire/firebolt.png').convert_alpha()
     
@@ -103,6 +103,7 @@ class Imp(Enemy):
     def animate(self, dt):
         if int(self.frameIndex) == 2 and self.attacking and self.spellCooldown():
             if self.getPlayerDistanceDirection()[0] < self.attackRange:
+                assets.impAttackSound.play()
                 Firebolt(self.fireboltSurf, self.rect.topleft, self.getPlayerDistanceDirection()[1], [self.allSprites, self.fireboltSprites])
                 self.lastAttack = pygame.time.get_ticks()
         self.frameIndex += 7 * dt

@@ -57,6 +57,7 @@ class Menu:
         game.run()
     
     def run(self):
+        assets.menuMusic.play(loops = -1)
         running = True
         while running:
             for event in pygame.event.get():

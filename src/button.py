@@ -52,6 +52,7 @@ class Button:
             return False
 
     def click(self):
+        assets.buttonClickSound.play()
         if self.action:
             self.action()
     

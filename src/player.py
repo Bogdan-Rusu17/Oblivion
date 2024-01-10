@@ -55,6 +55,7 @@ class Player(pygame.sprite.Sprite):
             if self.rect.colliderect(sprite):
                 self.damage(sprite.amount)
                 sprite.kill()
+                assets.explosionSound.play()
 
     def checkWinLevel(self):
         pass
@@ -93,15 +94,18 @@ class Player(pygame.sprite.Sprite):
                     path = folder[0].replace('\\', '/') + '/' + file_name
                     surf = pygame.image.load(path).convert_alpha()
                     surf = pygame.transform.scale(surf, (assets.width / 8, surf.get_height() * assets.width / (8 * surf.get_width())))
-                    key = folder[0].split('\\')[1]
+                    # key = folder[0].split('\\')[1]
+                    key = folder[0].replace('\\', '/').split('/')[-1]
                     self.animations[key].append(surf)
     
     def attackMelee(self):
         for sprite in self.enemies.sprites():
             if self.rect.colliderect(sprite):
+                assets.attackMelee.play()
                 sprite.damage(self.meleeDamage)
     def attackSpell(self):
         self.mana -= 50
+        assets.attackRanged.play()
         if self.status.split('_')[0] == 'left':
             Deathbolt(pygame.transform.rotate(self.boltSurf, -90), self.rect.topleft, pygame.math.Vector2(-1, 0), self.allSprites, self.enemies)
         if self.status.split('_')[0] == 'right':
@@ -256,6 +260,7 @@ class Deathbolt(pygame.sprite.Sprite):
     def detectEnemyCollision(self):
         for sprite in self.enemies.sprites():
             if self.rect.colliderect(sprite):
+                assets.explosionSound.play()
                 sprite.damage(self.amount)
                 self.kill()
 
