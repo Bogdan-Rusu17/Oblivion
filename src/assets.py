@@ -30,6 +30,11 @@ def importAssets():
     width, height = pygame.display.list_modes()[0]
     screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
 
+    surf = pygame.image.load("../graphics/pointer.png")
+    surf = pygame.transform.scale(surf, (2 * surf.get_width(), 2 * surf.get_height()))
+    cursor = pygame.cursors.Cursor((0, 0), surf)
+    pygame.mouse.set_cursor(cursor) 
+
     global menuMusic, gameMusic, buttonClickSound, portalSound, impAttackSound, explosionSound, victoryMusic, attackMelee, attackRanged
     menuMusic = pygame.mixer.Sound('../sounds/battleThemeA.mp3')
     gameMusic = pygame.mixer.Sound('../sounds/DungeonOfFate.mp3')

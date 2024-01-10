@@ -32,3 +32,4 @@ class OptionsMenu():
     def toggle_menu(self):
         # Toggle the menu's active state
         self.active = not self.active
+        pygame.mouse.set_visible(not pygame.mouse.get_visible())

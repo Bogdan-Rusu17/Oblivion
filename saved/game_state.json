@@ -1,20 +1,27 @@
 {
-    "level": "level2",
+    "level": "level1",
     "player": {
         "player_position": [
-            5110,
-            2656
+            6298,
+            1130
         ],
-        "health": 250,
-        "mana": 100
+        "health": 225.5609999999945,
+        "mana": 61.80400000000033
     },
     "imps": [
         {
             "position": [
-                6097,
-                1691
+                3803,
+                682
             ],
-            "health": 600
+            "health": 300
+        },
+        {
+            "position": [
+                6382,
+                1112
+            ],
+            "health": 110
         }
     ]
 }

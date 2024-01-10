@@ -6,7 +6,9 @@ class Main():
         pygame.init()
         assets.importAssets()
         pygame.display.set_caption('Oblivion')
-        pygame.display.set_icon(pygame.image.load('../graphics/game_icon.png').convert_alpha())
+        icon = pygame.image.load('../graphics/game_icon.png').convert_alpha()
+        icon = pygame.transform.scale(icon, (32, 32))
+        pygame.display.set_icon(icon)
 
     def run(self):
         menu = Menu()

@@ -32,6 +32,7 @@ class MySprite(pygame.sprite.Sprite):
 
 class Game():
     def __init__(self, flag):
+        pygame.mouse.set_visible(False)
         self.isWon = False
         self.winTime = None
         self.displaySurface = assets.screen
